@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Nova & Ridwan 💕 Museum Cinta</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Great+Vibes&family=Lato:wght@300;400&display=swap');
+
+:root {
+  --cream: #FDF6EC;
+  --blush: #F4C2C2;
+  --rose: #E8A0A0;
+  --deep-rose: #C97A7A;
+  --mauve: #D4A5A5;
+  --gold: #D4AF6E;
+  --text-dark: #5C3A3A;
+  --text-mid: #8B5E5E;
+  --white: #FFFDF9;
+  /* Theme overrides (customizer will change these) */
+  --theme-primary: #E8A0A0;
+  --theme-secondary: #F4C2C2;
+  --theme-accent: #C97A7A;
+  --theme-bg: #FDF6EC;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Lato', sans-serif;
+  background: var(--cream);
+  color: var(--text-dark);
+  overflow-x: hidden;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ====== SPARKLE ====== */
+#sparkle-canvas { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
+
+/* ====== OVERLAY ====== */
+#zoom-overlay { position:fixed; inset:0; background:var(--cream); z-index:998; pointer-events:none; opacity:0; transition:opacity 0.5s ease; }
+#zoom-overlay.on { opacity:1; }
+
+/* ====== TOAST ====== */
+.toast {
+  position:fixed; top:30px; left:50%; transform:translateX(-50%) translateY(-100px);
+  background:rgba(255,248,248,0.96); border:1px solid var(--blush); border-radius:50px;
+  padding:12px 24px; font-family:'Cormorant Garamond',serif; font-size:14px; font-style:italic;
+  color:var(--text-dark); box-shadow:0 8px 30px rgba(201,122,122,0.2); z-index:9997;
+  transition:transform 0.4s cubic-bezier(.4,0,.2,1); white-space:nowrap;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ====== MUSIC BAR ====== */
+.music-bar {
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+  background:rgba(255,248,248,0.93); backdrop-filter:blur(14px);
+  border-radius:50px; padding:10px 18px;
+  display:none; align-items:center; gap:10px;
+  box-shadow:0 8px 30px rgba(201,122,122,0.25); border:1px solid rgba(212,165,165,0.3);
+  z-index:500;
+}
+.music-bar.show { display:flex; }
+.music-btn {
+  width:36px; height:36px; border-radius:50%;
+  background:linear-gradient(135deg,var(--rose),var(--deep-rose));
+  border:none; color:white; font-size:13px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 12px rgba(201,122,122,0.35); transition:transform .2s;
+}
+.music-btn:hover { transform:scale(1.1); }
+.music-info .music-title { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:13px; color:var(--text-dark); }
+.music-info .music-artist { font-size:11px; color:var(--text-mid); font-family:'Cormorant Garamond',serif; }
+.music-wave { display:flex; gap:3px; align-items:flex-end; height:20px; }
+.wave-bar { width:3px; background:var(--rose); border-radius:2px; animation:wave .8s ease infinite alternate; }
+.wave-bar:nth-child(1){height:8px;animation-delay:0s}
+.wave-bar:nth-child(2){height:14px;animation-delay:.15s}
+.wave-bar:nth-child(3){height:10px;animation-delay:.3s}
+.wave-bar:nth-child(4){height:16px;animation-delay:.1s}
+.wave-bar:nth-child(5){height:6px;animation-delay:.25s}
+@keyframes wave { 0%{transform:scaleY(.4)} 100%{transform:scaleY(1)} }
+
+/* ====== PAGES ====== */
+.page { min-height:100vh; display:none; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+.page.active { display:flex; }
+#page-main { min-height:100vh; display:none; flex-direction:column; }
+#page-main.active { display:flex; }
+
+/* ====== COVER ====== */
+#page-cover { background:linear-gradient(160deg,#FDF0E8 0%,#FDE8E8 50%,#F8D7D7 100%); }
+.corner-floral { position:absolute; font-size:64px; opacity:.15; pointer-events:none; filter:hue-rotate(330deg) saturate(1.5); }
+.corner-floral.tl{top:-10px;left:-10px;transform:rotate(-15deg)}
+.corner-floral.tr{top:-10px;right:-10px;transform:rotate(15deg) scaleX(-1)}
+.corner-floral.bl{bottom:-10px;left:-10px;transform:rotate(10deg) scaleY(-1)}
+.corner-floral.br{bottom:-10px;right:-10px;transform:rotate(-10deg) scale(-1,-1)}
+
+.cover-content { text-align:center; z-index:10; padding:40px 30px; }
+.cover-subtitle { font-family:'Cormorant Garamond',serif; font-style:italic; color:var(--deep-rose); font-size:13px; letter-spacing:3px; text-transform:uppercase; margin-bottom:16px; opacity:0; animation:fadeUp 1s ease .3s both; }
+.cover-names { font-family:'Great Vibes',cursive; font-size:72px; color:var(--text-dark); line-height:1; text-shadow:2px 4px 12px rgba(201,122,122,.25); opacity:0; animation:fadeUp 1s ease .6s both; }
+.cover-amp { font-family:'Cormorant Garamond',serif; font-size:36px; color:var(--rose); display:block; margin:6px 0; }
+.cover-divider { display:flex; align-items:center; gap:12px; margin:22px auto; width:200px; opacity:0; animation:fadeUp 1s ease .9s both; }
+.cover-divider .line { flex:1; height:1px; background:linear-gradient(to right,transparent,var(--mauve),transparent); }
+.cover-tagline { font-family:'Cormorant Garamond',serif; font-size:15px; color:var(--text-mid); font-style:italic; margin-bottom:36px; opacity:0; animation:fadeUp 1s ease 1.1s both; }
+.btn-open {
+  background:linear-gradient(135deg,var(--rose),var(--deep-rose));
+  color:white; border:none; padding:16px 48px; border-radius:50px;
+  font-family:'Lato',sans-serif; font-size:15px; letter-spacing:2px; text-transform:uppercase;
+  cursor:pointer; box-shadow:0 8px 30px rgba(201,122,122,.4);
+  transition:all .3s ease; position:relative; overflow:hidden;
+  opacity:0; animation:fadeUp 1s ease 1.4s both;
+}
+.btn-open::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.2),transparent); border-radius:50px; }
+.btn-open:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(201,122,122,.55); }
+
+.petal-float { position:absolute; pointer-events:none; opacity:.5; animation:petalFloat linear infinite; }
+@keyframes petalFloat {
+  0%{transform:translateY(110vh) rotate(0deg);opacity:0}
+  10%{opacity:.5} 90%{opacity:.5}
+  100%{transform:translateY(-10vh) rotate(360deg);opacity:0}
+}
+
+/* ====== ENVELOPE ====== */
+#page-envelope { background:linear-gradient(160deg,#FDF0E8,#FDEAEA); }
+.envelope-wrap { position:relative; width:300px; height:240px; cursor:pointer; }
+.env-body { width:300px; height:200px; background:linear-gradient(135deg,#F9E4E4,#F7D5D5); border-radius:4px 4px 8px 8px; position:absolute; bottom:0; box-shadow:0 10px 40px rgba(201,122,122,.3); border:1px solid rgba(212,165,165,.5); }
+.env-flap { width:0; height:0; border-left:150px solid transparent; border-right:150px solid transparent; border-top:110px solid #EDBBBB; position:absolute; top:0; left:0; transform-origin:top center; transition:transform .8s cubic-bezier(.4,0,.2,1); z-index:2; }
+.env-flap.open { transform:rotateX(180deg); }
+.env-flap-back { width:0; height:0; border-left:150px solid transparent; border-right:150px solid transparent; border-top:110px solid #E8AEAE; position:absolute; top:0; left:0; z-index:0; }
+.env-bl { width:0; height:0; border-bottom:100px solid #F0C4C4; border-right:150px solid transparent; position:absolute; bottom:0; left:0; }
+.env-br { width:0; height:0; border-bottom:100px solid #EDBBBB; border-left:150px solid transparent; position:absolute; bottom:0; right:0; }
+.env-letter { position:absolute; width:240px; background:white; border-radius:4px; left:30px; bottom:20px; padding:20px; text-align:center; transform:translateY(60px); transition:transform 1s cubic-bezier(.4,0,.2,1) .4s; box-shadow:0 2px 12px rgba(0,0,0,.1); z-index:1; }
+.env-letter.rise { transform:translateY(-30px); }
+.env-letter .l-heart { font-size:28px; }
+.env-letter .l-text { font-family:'Cormorant Garamond',serif; font-style:italic; color:var(--deep-rose); font-size:13px; margin-top:6px; }
+.env-hint { position:absolute; bottom:-50px; left:50%; transform:translateX(-50%); font-family:'Cormorant Garamond',serif; font-style:italic; color:var(--text-mid); font-size:14px; white-space:nowrap; animation:pulse 2s ease infinite; }
+
+/* ====== LOADING HEART ====== */
+#page-loading { background:linear-gradient(160deg,#FDF0E8,#FDE8E8); }
+.loading-text { font-family:'Great Vibes',cursive; font-size:32px; color:var(--deep-rose); text-align:center; margin-top:20px; opacity:0; animation:fadeIn 1s ease 2s both; }
+
+/* ====== PASSWORD ====== */
+#page-password { background:linear-gradient(160deg,#FDF0E8 0%,#FDE8E8 50%,#FAEAEA 100%); }
+.pw-deco { position:absolute; top:0; left:0; right:0; height:140px; background:linear-gradient(135deg,var(--blush),var(--rose)); clip-path:ellipse(60% 100% at 50% 0%); opacity:.6; }
+.pw-card { background:rgba(255,253,249,.95); border-radius:28px; padding:36px 28px; width:90%; max-width:360px; box-shadow:0 20px 60px rgba(201,122,122,.2); position:relative; z-index:2; }
+.pw-icon { font-size:40px; text-align:center; margin-bottom:8px; }
+.pw-title { font-family:'Playfair Display',serif; font-size:22px; color:var(--text-dark); text-align:center; margin-bottom:4px; }
+.pw-hint { font-family:'Cormorant Garamond',serif; font-size:13px; color:var(--text-mid); text-align:center; font-style:italic; margin-bottom:20px; }
+.pw-display { display:flex; justify-content:center; gap:10px; margin-bottom:24px; }
+.pw-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--mauve); transition:all .3s ease; }
+.pw-dot.filled { background:var(--rose); border-color:var(--rose); transform:scale(1.2); }
+.pw-keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.pw-key { background:linear-gradient(135deg,#FFF5F5,#FFE8E8); border:1px solid rgba(212,165,165,.4); border-radius:16px; padding:16px; font-family:'Playfair Display',serif; font-size:22px; font-weight:600; color:var(--text-dark); cursor:pointer; transition:all .2s ease; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.8); user-select:none; }
+.pw-key:hover { background:linear-gradient(135deg,var(--blush),var(--rose)); color:white; transform:translateY(-2px); }
+.pw-key:active { transform:scale(.94); }
+.pw-key.del { font-size:18px; }
+.pw-key.enter { background:linear-gradient(135deg,var(--rose),var(--deep-rose)); color:white; font-size:14px; letter-spacing:1px; }
+.pw-error { text-align:center; color:#c0392b; font-size:13px; margin-top:12px; height:18px; font-family:'Cormorant Garamond',serif; font-style:italic; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+.shake { animation:shake .4s ease; }
+
+/* ====== MAIN ====== */
+.falling-petal { position:fixed; top:-50px; pointer-events:none; z-index:50; animation:fall linear infinite; }
+@keyframes fall {
+  0%{transform:translateY(-60px) rotate(0deg);opacity:0}
+  5%{opacity:.7} 95%{opacity:.7}
+  100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+}
+
+/* HERO */
+.hero-section { min-height:100vh; background:linear-gradient(160deg,#FDF0E8,#FDE8E8 50%,#F8D0D0); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 30px; position:relative; overflow:hidden; }
+.hero-circle { position:absolute; border-radius:50%; pointer-events:none; }
+.hero-circle.c1{width:300px;height:300px;background:radial-gradient(circle,rgba(244,194,194,.25),transparent);top:-80px;right:-80px}
+.hero-circle.c2{width:200px;height:200px;background:radial-gradient(circle,rgba(212,175,110,.15),transparent);bottom:60px;left:-50px}
+.hero-badge { background:rgba(255,255,255,.7); border:1px solid rgba(212,165,165,.4); border-radius:50px; padding:6px 20px; font-family:'Cormorant Garamond',serif; font-size:13px; color:var(--deep-rose); letter-spacing:2px; margin-bottom:24px; backdrop-filter:blur(8px); }
+.hero-names { font-family:'Great Vibes',cursive; font-size:80px; color:var(--text-dark); line-height:1; text-shadow:2px 6px 16px rgba(201,122,122,.2); animation:glowPulse 4s ease infinite alternate; }
+.hero-amp { display:block; font-size:40px; color:var(--rose); margin:4px 0; }
+.hero-quote { font-family:'Cormorant Garamond',serif; font-size:17px; font-style:italic; color:var(--text-mid); max-width:280px; line-height:1.7; margin-top:16px; }
+.scroll-hint { position:absolute; bottom:30px; font-size:24px; animation:bounce 2s ease infinite; color:var(--mauve); }
+
+/* SECTIONS */
+.content-section { padding:60px 30px; text-align:center; position:relative; overflow:hidden; }
+.s-eyebrow { font-family:'Cormorant Garamond',serif; font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--rose); margin-bottom:10px; }
+.s-title { font-family:'Playfair Display',serif; font-size:28px; color:var(--text-dark); margin-bottom:8px; line-height:1.3; }
+.s-divider { display:flex; align-items:center; gap:12px; margin:14px auto 22px; width:160px; }
+.s-divider .ln { flex:1; height:1px; background:linear-gradient(to right,transparent,var(--mauve),transparent); }
+
+/* COUPLE */
+.couple-frame { position:relative; width:220px; height:280px; margin:0 auto 28px; }
+.couple-photo-bg { width:100%; height:100%; background:linear-gradient(135deg,#F9E4E4,#F5D0D0); border-radius:110px 110px 90px 90px; display:flex; align-items:center; justify-content:center; font-size:72px; box-shadow:0 20px 50px rgba(201,122,122,.25),inset 0 0 0 3px rgba(255,255,255,.6); position:relative; overflow:hidden; }
+.couple-photo-bg img { width:100%; height:100%; object-fit:cover; border-radius:inherit; }
+.couple-photo-bg::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.4),transparent 60%); pointer-events:none; }
+.frame-deco { position:absolute; font-size:22px; opacity:.7; }
+.frame-deco.tl{top:-8px;left:-8px;transform:rotate(-20deg)}
+.frame-deco.tr{top:-8px;right:-8px;transform:rotate(20deg)}
+.frame-deco.bl{bottom:-8px;left:10px;transform:rotate(15deg)}
+.frame-deco.br{bottom:-8px;right:10px;transform:rotate(-15deg)}
+
+/* PHOTOS GRID */
+.photos-section { background:linear-gradient(to bottom,var(--cream),#FAEAEA); }
+.photos-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:20px; }
+.photo-card { background:linear-gradient(135deg,#F9E4E4,#F5D0D0); border-radius:16px; aspect-ratio:3/4; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 24px rgba(201,122,122,.15); border:2px solid rgba(255,255,255,.8); overflow:hidden; position:relative; cursor:pointer; transition:transform .3s ease; }
+.photo-card:hover{transform:scale(1.03)}
+.photo-card img { width:100%; height:100%; object-fit:cover; border-radius:14px; }
+.photo-card .p-emoji { font-size:48px; }
+.photo-card .p-cap { font-family:'Cormorant Garamond',serif; font-size:12px; font-style:italic; color:var(--text-mid); margin-top:8px; padding:0 8px; text-align:center; }
+.photo-card-wide { grid-column:span 2; aspect-ratio:16/9; flex-direction:row; gap:16px; }
+.photo-card-wide .p-emoji { font-size:60px; }
+.photo-upload-btn { background:rgba(255,255,255,.6); border:2px dashed var(--mauve); border-radius:12px; padding:10px 14px; font-family:'Cormorant Garamond',serif; font-size:12px; font-style:italic; color:var(--text-mid); cursor:pointer; transition:all .2s; margin-top:8px; }
+.photo-upload-btn:hover { background:rgba(255,255,255,.9); border-color:var(--rose); }
+.photo-slot-label { font-family:'Cormorant Garamond',serif; font-size:11px; font-style:italic; color:var(--text-mid); position:absolute; bottom:8px; left:0; right:0; text-align:center; }
+input[type=file] { display:none; }
+
+/* LIGHTBOX */
+#lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:9990; align-items:center; justify-content:center; padding:20px; }
+#lightbox.open { display:flex; }
+#lightbox-img { max-width:100%; max-height:80vh; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+#lightbox-close { position:absolute; top:20px; right:20px; background:rgba(255,255,255,.15); border:none; color:white; font-size:28px; width:44px; height:44px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+
+/* COUNTER */
+.counter-section { background:linear-gradient(135deg,#F8D7D7,#F5C8C8); padding:50px 30px; text-align:center; position:relative; }
+.counter-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:24px; }
+.counter-item { background:rgba(255,255,255,.6); border-radius:20px; padding:20px 10px; backdrop-filter:blur(10px); box-shadow:0 4px 16px rgba(201,122,122,.15); }
+.counter-num { font-family:'Playfair Display',serif; font-size:36px; font-weight:600; color:var(--deep-rose); display:block; }
+.counter-lbl { font-family:'Cormorant Garamond',serif; font-size:12px; color:var(--text-mid); font-style:italic; }
+
+/* TIMELINE */
+.timeline-item { display:flex; gap:16px; margin-bottom:28px; text-align:left; opacity:0; transform:translateX(-20px); transition:all .6s ease; }
+.timeline-item.visible { opacity:1; transform:translateX(0); }
+.tl-dot { width:44px; height:44px; min-width:44px; border-radius:50%; background:linear-gradient(135deg,var(--blush),var(--rose)); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 12px rgba(201,122,122,.3); }
+.tl-date { font-family:'Cormorant Garamond',serif; font-size:12px; color:var(--rose); letter-spacing:1px; font-style:italic; }
+.tl-text { font-family:'Playfair Display',serif; font-size:16px; color:var(--text-dark); margin-top:2px; }
+.tl-desc { font-family:'Lato',sans-serif; font-size:13px; color:var(--text-mid); margin-top:4px; line-height:1.6; }
+
+/* QUOTE */
+.quote-section { background:linear-gradient(160deg,#F8E8E8,#FDEAEA); padding:60px 30px; text-align:center; }
+.big-quote { font-family:'Great Vibes',cursive; font-size:46px; color:var(--deep-rose); line-height:1.3; text-shadow:2px 4px 12px rgba(201,122,122,.2); margin:20px 0; }
+.quote-body { font-family:'Cormorant Garamond',serif; font-size:16px; font-style:italic; color:var(--text-mid); max-width:300px; margin:0 auto; line-height:1.8; }
+
+/* ====== GUESTBOOK ====== */
+.guestbook-section { background:linear-gradient(160deg,#FDF6EC,#FDE8E8); padding:60px 24px; }
+.gb-form-card { background:rgba(255,253,249,.95); border-radius:24px; padding:28px 22px; box-shadow:0 12px 40px rgba(201,122,122,.15); margin-bottom:28px; border:1px solid rgba(212,165,165,.2); }
+.gb-form-title { font-family:'Playfair Display',serif; font-size:18px; color:var(--text-dark); margin-bottom:16px; text-align:center; }
+.gb-input { width:100%; border:1.5px solid rgba(212,165,165,.4); border-radius:14px; padding:12px 16px; font-family:'Lato',sans-serif; font-size:14px; color:var(--text-dark); background:rgba(255,255,255,.8); outline:none; transition:border-color .2s; margin-bottom:10px; }
+.gb-input:focus { border-color:var(--rose); box-shadow:0 0 0 3px rgba(232,160,160,.15); }
+.gb-textarea { resize:vertical; min-height:90px; font-family:'Cormorant Garamond',serif; font-size:15px; font-style:italic; line-height:1.6; }
+.gb-emoji-row { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.gb-emoji-btn { font-size:22px; background:rgba(255,255,255,.7); border:1.5px solid rgba(212,165,165,.3); border-radius:10px; padding:6px 10px; cursor:pointer; transition:all .2s; }
+.gb-emoji-btn.selected,.gb-emoji-btn:hover { background:var(--blush); border-color:var(--rose); transform:scale(1.15); }
+.gb-submit { width:100%; background:linear-gradient(135deg,var(--rose),var(--deep-rose)); color:white; border:none; border-radius:50px; padding:14px; font-family:'Lato',sans-serif; font-size:14px; letter-spacing:1px; cursor:pointer; box-shadow:0 6px 20px rgba(201,122,122,.35); transition:all .3s; margin-top:4px; }
+.gb-submit:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(201,122,122,.5); }
+
+.gb-messages { display:flex; flex-direction:column; gap:14px; }
+.gb-msg { background:rgba(255,253,249,.92); border-radius:18px; padding:16px 18px; box-shadow:0 4px 16px rgba(201,122,122,.1); border:1px solid rgba(212,165,165,.2); position:relative; opacity:0; transform:translateY(20px); transition:all .5s ease; }
+.gb-msg.visible { opacity:1; transform:translateY(0); }
+.gb-msg-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.gb-msg-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--blush),var(--rose)); display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 2px 8px rgba(201,122,122,.2); }
+.gb-msg-name { font-family:'Playfair Display',serif; font-size:14px; font-weight:600; color:var(--text-dark); }
+.gb-msg-time { font-family:'Cormorant Garamond',serif; font-size:11px; color:var(--text-mid); font-style:italic; margin-left:auto; }
+.gb-msg-text { font-family:'Cormorant Garamond',serif; font-size:15px; font-style:italic; color:var(--text-mid); line-height:1.7; }
+.gb-msg-emoji { font-size:20px; margin-top:6px; }
+.gb-empty { text-align:center; font-family:'Cormorant Garamond',serif; font-style:italic; color:var(--text-mid); font-size:15px; padding:24px; opacity:.7; }
+
+/* ====== THEME CUSTOMIZER ====== */
+#customizer-btn { position:fixed; top:20px; right:16px; width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,var(--blush),var(--rose)); border:none; font-size:18px; cursor:pointer; box-shadow:0 4px 16px rgba(201,122,122,.35); z-index:600; display:none; transition:transform .2s; }
+#customizer-btn:hover { transform:scale(1.1) rotate(20deg); }
+#customizer-btn.show { display:flex; align-items:center; justify-content:center; }
+
+#customizer-panel {
+  position:fixed; top:0; right:-320px; width:300px; height:100%; background:rgba(255,250,250,.97);
+  backdrop-filter:blur(20px); z-index:700; box-shadow:-10px 0 40px rgba(201,122,122,.2);
+  transition:right .4s cubic-bezier(.4,0,.2,1); padding:60px 24px 40px; overflow-y:auto;
+  border-left:1px solid rgba(212,165,165,.2);
+}
+#customizer-panel.open { right:0; }
+.c-close { position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-mid); }
+.c-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--text-dark); margin-bottom:20px; }
+.c-label { font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic; color:var(--text-mid); margin-bottom:8px; display:block; }
+.c-themes { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:20px; }
+.c-theme-btn { border-radius:12px; padding:12px 8px; border:2px solid transparent; cursor:pointer; text-align:center; font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic; transition:all .2s; }
+.c-theme-btn:hover,.c-theme-btn.active { border-color:var(--rose); transform:scale(1.05); }
+.c-section { margin-bottom:20px; }
+.c-colors { display:flex; gap:8px; flex-wrap:wrap; }
+.c-color-swatch { width:32px; height:32px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:all .2s; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+.c-color-swatch:hover,.c-color-swatch.active { border-color:var(--text-dark); transform:scale(1.15); }
+.c-input { width:100%; border:1.5px solid rgba(212,165,165,.4); border-radius:12px; padding:10px 14px; font-family:'Lato',sans-serif; font-size:13px; color:var(--text-dark); outline:none; background:rgba(255,255,255,.8); margin-bottom:10px; }
+.c-apply { width:100%; background:linear-gradient(135deg,var(--rose),var(--deep-rose)); color:white; border:none; border-radius:50px; padding:13px; font-family:'Lato',sans-serif; font-size:13px; letter-spacing:1px; cursor:pointer; box-shadow:0 4px 16px rgba(201,122,122,.3); transition:all .3s; margin-top:8px; }
+.c-apply:hover { transform:translateY(-2px); }
+
+/* FOOTER */
+.footer-section { background:linear-gradient(135deg,#5C3A3A,#7A4E4E); color:rgba(255,255,255,.8); padding:50px 30px; text-align:center; }
+.footer-names { font-family:'Great Vibes',cursive; font-size:48px; color:white; text-shadow:2px 4px 12px rgba(0,0,0,.3); }
+.footer-text { font-family:'Cormorant Garamond',serif; font-size:14px; font-style:italic; margin-top:12px; opacity:.7; }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
+@keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
+@keyframes glowPulse { 0%{text-shadow:0 0 10px rgba(201,122,122,.3)} 100%{text-shadow:0 0 30px rgba(201,122,122,.6),0 0 60px rgba(212,175,110,.3)} }
+
+.aos { opacity:0; transform:translateY(28px); transition:all .8s cubic-bezier(.4,0,.2,1); }
+.aos.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- Sparkle Canvas -->
+<canvas id="sparkle-canvas"></canvas>
+<!-- Zoom Overlay -->
+<div id="zoom-overlay"></div>
+<!-- Toast -->
+<div class="toast" id="toast">🌸 Selamat datang, Sayang 🌸</div>
+
+<!-- Music Bar -->
+<div class="music-bar" id="music-bar">
+  <button class="music-btn" id="music-btn" onclick="toggleMusic()">▶</button>
+  <div class="music-info">
+    <div class="music-title">River Flows in You</div>
+    <div class="music-artist">Yiruma • Piano</div>
+  </div>
+  <div class="music-wave" id="music-wave" style="visibility:hidden">
+    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div>
+  </div>
+</div>
+
+<!-- Customizer Button -->
+<button id="customizer-btn" onclick="toggleCustomizer()">🎨</button>
+
+<!-- Customizer Panel -->
+<div id="customizer-panel">
+  <button class="c-close" onclick="toggleCustomizer()">✕</button>
+  <div class="c-title">🎨 Tema Undangan</div>
+
+  <div class="c-section">
+    <span class="c-label">Pilih Tema</span>
+    <div class="c-themes">
+      <button class="c-theme-btn active" style="background:linear-gradient(135deg,#F4C2C2,#E8A0A0)" onclick="applyTheme('rose')">🌹 Rose</button>
+      <button class="c-theme-btn" style="background:linear-gradient(135deg,#C8E6C9,#81C784)" onclick="applyTheme('sage')">🌿 Sage</button>
+      <button class="c-theme-btn" style="background:linear-gradient(135deg,#B3D9FF,#74B9E0)" onclick="applyTheme('sky')">🌸 Sky</button>
+      <button class="c-theme-btn" style="background:linear-gradient(135deg,#F8E1F4,#CE93D8)" onclick="applyTheme('lavender')">💜 Lavender</button>
+      <button class="c-theme-btn" style="background:linear-gradient(135deg,#FFE0B2,#FFB74D)" onclick="applyTheme('peach')">🍑 Peach</button>
+      <button class="c-theme-btn" style="background:linear-gradient(135deg,#2C2C2C,#5C5C5C);color:#FFD700" onclick="applyTheme('dark')">🌙 Dark</button>
+    </div>
+  </div>
+
+  <div class="c-section">
+    <span class="c-label">Nama Pasangan</span>
+    <input class="c-input" id="c-name1" placeholder="Nama 1 (misal: Nova)" value="Nova">
+    <input class="c-input" id="c-name2" placeholder="Nama 2 (misal: Ridwan)" value="Ridwan">
+  </div>
+
+  <div class="c-section">
+    <span class="c-label">Tanggal Jadian</span>
+    <input class="c-input" type="date" id="c-date" value="2025-12-06">
+  </div>
+
+  <div class="c-section">
+    <span class="c-label">Kata Romantis</span>
+    <input class="c-input" id="c-quote" placeholder="Kata-kata untuk dia..." value="Kamu adalah rumah yang selalu ingin aku pulang ke sana.">
+  </div>
+
+  <div class="c-section">
+    <span class="c-label">Password Undangan</span>
+    <input class="c-input" id="c-pass" type="text" placeholder="4 digit angka" value="0612" maxlength="4">
+  </div>
+
+  <button class="c-apply" onclick="applyCustomizer()">✨ Terapkan Perubahan</button>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" onclick="closeLightbox()">
+  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- ======== PAGE: COVER ======== -->
+<div class="page active" id="page-cover">
+  <span class="corner-floral tl">🌸🌺</span>
+  <span class="corner-floral tr">🌸🌺</span>
+  <span class="corner-floral bl">🌼🌹</span>
+  <span class="corner-floral br">🌼🌹</span>
+  <div id="cover-petals"></div>
+  <div class="cover-content">
+    <div class="cover-subtitle">Sebuah Kisah Cinta</div>
+    <div class="cover-names" id="cover-names-display">
+      <span id="cover-n1">Nova</span>
+      <span class="cover-amp">&</span>
+      <span id="cover-n2">Ridwan</span>
+    </div>
+    <div class="cover-divider"><div class="line"></div><span style="color:var(--rose);font-size:16px">💕</span><div class="line"></div></div>
+    <div class="cover-tagline">Museum Digital Cinta Kita</div>
+    <button class="btn-open" onclick="openEnvelope()">✉ Buka Undangan</button>
+  </div>
+</div>
+
+<!-- ======== PAGE: ENVELOPE ======== -->
+<div class="page" id="page-envelope">
+  <div style="text-align:center;margin-bottom:30px;z-index:2">
+    <div class="s-eyebrow">Untuk Kamu</div>
+    <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--text-dark)">Surat Cintaku 💌</div>
+  </div>
+  <div class="envelope-wrap" id="env-wrap" onclick="openLetter()">
+    <div class="env-flap" id="env-flap"></div>
+    <div class="env-flap-back"></div>
+    <div class="env-body">
+      <div class="env-bl"></div>
+      <div class="env-br"></div>
+      <div class="env-letter" id="env-letter">
+        <div class="l-heart">💌</div>
+        <div class="l-text" id="env-names-text">Nova & Ridwan<br>dengan sepenuh hati</div>
+      </div>
+    </div>
+    <div class="env-hint">✨ Ketuk untuk membuka ✨</div>
+  </div>
+</div>
+
+<!-- ======== PAGE: LOADING ======== -->
+<div class="page" id="page-loading">
+  <canvas id="heart-canvas" width="300" height="280"></canvas>
+  <div class="loading-text">Kisah Cinta Kita...</div>
+</div>
+
+<!-- ======== PAGE: PASSWORD ======== -->
+<div class="page" id="page-password">
+  <div class="pw-deco"></div>
+  <div class="pw-card">
+    <div class="pw-icon">🔐</div>
+    <div class="pw-title">Masukkan Kata Sandi</div>
+    <div class="pw-hint">Hanya untukmu, Sayang 🌸<br><small style="font-size:11px;color:#b8888a">(Hint: tanggal jadian kita)</small></div>
+    <div class="pw-display">
+      <div class="pw-dot" id="d0"></div><div class="pw-dot" id="d1"></div>
+      <div class="pw-dot" id="d2"></div><div class="pw-dot" id="d3"></div>
+    </div>
+    <div class="pw-keypad">
+      <button class="pw-key" onclick="pwPress('1')">1</button>
+      <button class="pw-key" onclick="pwPress('2')">2</button>
+      <button class="pw-key" onclick="pwPress('3')">3</button>
+      <button class="pw-key" onclick="pwPress('4')">4</button>
+      <button class="pw-key" onclick="pwPress('5')">5</button>
+      <button class="pw-key" onclick="pwPress('6')">6</button>
+      <button class="pw-key" onclick="pwPress('7')">7</button>
+      <button class="pw-key" onclick="pwPress('8')">8</button>
+      <button class="pw-key" onclick="pwPress('9')">9</button>
+      <button class="pw-key del" onclick="pwDel()">⌫</button>
+      <button class="pw-key" onclick="pwPress('0')">0</button>
+      <button class="pw-key enter" onclick="pwEnter()">OK ✓</button>
+    </div>
+    <div class="pw-error" id="pw-error"></div>
+  </div>
+</div>
+
+<!-- ======== PAGE: MAIN ======== -->
+<div id="page-main">
+  <div id="falling-container"></div>
+
+  <!-- HERO -->
+  <section class="hero-section" id="hero">
+    <div class="hero-circle c1"></div>
+    <div class="hero-circle c2"></div>
+    <div class="hero-badge aos" id="hero-badge">✨ 06 Desember 2025 ✨</div>
+    <div class="hero-names aos" id="hero-names">
+      <span id="hero-n1">Nova</span>
+      <span class="hero-amp">&</span>
+      <span id="hero-n2">Ridwan</span>
+    </div>
+    <canvas id="love-canvas" width="260" height="220"></canvas>
+    <p class="hero-quote aos" id="hero-quote">"Kamu adalah rumah yang selalu ingin aku pulang ke sana."</p>
+    <div class="scroll-hint">↓</div>
+  </section>
+
+  <!-- COUPLE -->
+  <section class="content-section aos">
+    <div class="s-eyebrow">Museum Cinta</div>
+    <div class="s-title">Dua Jiwa, Satu Hati</div>
+    <div class="s-divider"><div class="ln"></div><span>🌹</span><div class="ln"></div></div>
+    <div class="couple-frame">
+      <div class="couple-photo-bg" id="couple-main-photo">
+        <span id="couple-emoji">💑</span>
+      </div>
+      <span class="frame-deco tl">🌸</span><span class="frame-deco tr">🌺</span>
+      <span class="frame-deco bl">🌼</span><span class="frame-deco br">🌹</span>
+    </div>
+    <label style="cursor:pointer">
+      <div class="photo-upload-btn">📷 Upload Foto Bersama</div>
+      <input type="file" accept="image/*" onchange="uploadMainPhoto(this)">
+    </label>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--text-mid);line-height:1.8;max-width:300px;margin:20px auto 0">
+      Perjalanan kami dimulai dari sebuah pertemuan tak terduga, tapi terasa seperti takdir yang sudah lama menunggu...
+    </p>
+  </section>
+
+  <!-- COUNTER -->
+  <section class="counter-section aos">
+    <div class="s-eyebrow" style="color:rgba(255,255,255,.8)">Sudah Berapa Lama</div>
+    <div style="font-family:'Playfair Display',serif;font-size:28px;color:white">Kita Bersama 💕</div>
+    <div class="s-divider" style="margin:14px auto 0"><div class="ln" style="background:rgba(255,255,255,.3)"></div><span>🌸</span><div class="ln" style="background:rgba(255,255,255,.3)"></div></div>
+    <div class="counter-grid">
+      <div class="counter-item aos"><span class="counter-num" id="cnt-y">0</span><span class="counter-lbl">Tahun</span></div>
+      <div class="counter-item aos"><span class="counter-num" id="cnt-m">0</span><span class="counter-lbl">Bulan</span></div>
+      <div class="counter-item aos"><span class="counter-num" id="cnt-d">0</span><span class="counter-lbl">Hari</span></div>
+    </div>
+    <div style="margin-top:20px">
+      <span style="font-family:'Playfair Display',serif;font-size:42px;font-weight:600;color:white" id="cnt-total">0</span>
+      <span style="display:block;font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:rgba(255,255,255,.7)">total hari bersama kamu 🌹</span>
+    </div>
+  </section>
+
+  <!-- PHOTOS -->
+  <section class="content-section photos-section aos">
+    <div class="s-eyebrow">Galeri Kenangan</div>
+    <div class="s-title">Momen Terindah Kita</div>
+    <div class="s-divider"><div class="ln"></div><span>📷</span><div class="ln"></div></div>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:var(--text-mid)">Ketuk untuk memperbesar • Upload foto aslimu!</p>
+    <div class="photos-grid" id="photos-grid">
+      <div class="photo-card aos" onclick="openSlot(0)">
+        <div class="p-emoji" id="ph-emoji-0">🥰</div>
+        <div class="p-cap" id="ph-cap-0">Pertemuan Pertama</div>
+        <div class="photo-slot-label">ketuk untuk upload</div>
+      </div>
+      <div class="photo-card aos" onclick="openSlot(1)">
+        <div class="p-emoji" id="ph-emoji-1">🌅</div>
+        <div class="p-cap" id="ph-cap-1">Date Pertama</div>
+        <div class="photo-slot-label">ketuk untuk upload</div>
+      </div>
+      <div class="photo-card aos" onclick="openSlot(2)">
+        <div class="p-emoji" id="ph-emoji-2">🎂</div>
+        <div class="p-cap" id="ph-cap-2">Ultah Bersama</div>
+        <div class="photo-slot-label">ketuk untuk upload</div>
+      </div>
+      <div class="photo-card aos" onclick="openSlot(3)">
+        <div class="p-emoji" id="ph-emoji-3">✈️</div>
+        <div class="p-cap" id="ph-cap-3">Liburan Bareng</div>
+        <div class="photo-slot-label">ketuk untuk upload</div>
+      </div>
+      <div class="photo-card photo-card-wide aos" onclick="openSlot(4)">
+        <div class="p-emoji" id="ph-emoji-4">💑</div>
+        <div class="p-cap" id="ph-cap-4">Kita & Segalanya 🌸</div>
+        <div class="photo-slot-label">ketuk untuk upload</div>
+      </div>
+    </div>
+    <!-- Hidden file inputs for each slot -->
+    <input type="file" id="slot-input" accept="image/*" style="display:none" onchange="handleSlotUpload(this)">
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="content-section aos">
+    <div class="s-eyebrow">Perjalanan Cinta</div>
+    <div class="s-title">Bab Demi Bab</div>
+    <div class="s-divider"><div class="ln"></div><span>📖</span><div class="ln"></div></div>
+    <div style="margin-top:10px;text-align:left;max-width:340px;margin-left:auto;margin-right:auto">
+      <div class="timeline-item">
+        <div class="tl-dot">🌱</div>
+        <div><div class="tl-date">Awal cerita</div><div class="tl-text">Pertama Bertemu</div><div class="tl-desc">Ketika dua dunia bertabrakan dan takdir mempertemukan kita...</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-dot">💌</div>
+        <div><div class="tl-date" id="tl-date-jadian">06 Desember 2025</div><div class="tl-text">Hari Jadian 🌹</div><div class="tl-desc">Kamu bilang "iya" dan duniaku berubah selamanya.</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-dot">🌸</div>
+        <div><div class="tl-date">Setiap hari</div><div class="tl-text">Tumbuh Bersama</div><div class="tl-desc">Setiap momen denganmu adalah halaman favorit dalam hidupku.</div></div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-dot">🌟</div>
+        <div><div class="tl-date">Sekarang & Selamanya</div><div class="tl-text">Masa Depan Kita</div><div class="tl-desc">Dan kisah ini... masih terus ditulis bersamamu.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <section class="quote-section aos">
+    <div class="s-eyebrow">Untuk Kamu</div>
+    <div class="big-quote">Kamu adalah puisi terbaik yang pernah aku baca...</div>
+    <div class="s-divider"><div class="ln"></div><span>💕</span><div class="ln"></div></div>
+    <p class="quote-body">
+      "Di antara semua keindahan di dunia ini, kamu selalu menjadi yang paling indah di mataku.
+      Setiap hari bersamamu adalah anugrah yang tidak pernah berhenti aku syukuri."
+    </p>
+    <div style="margin-top:24px;font-family:'Great Vibes',cursive;font-size:28px;color:var(--rose)" id="quote-sign">— Dengan cinta, Ridwan 🌹</div>
+  </section>
+
+  <!-- GUESTBOOK -->
+  <section class="guestbook-section aos">
+    <div class="s-eyebrow">Buku Tamu</div>
+    <div class="s-title" style="text-align:center">Titipkan Pesanmu 💌</div>
+    <div class="s-divider" style="margin-bottom:28px"><div class="ln"></div><span>✍️</span><div class="ln"></div></div>
+
+    <div class="gb-form-card">
+      <div class="gb-form-title">Tulis Pesan untuk Nova & Ridwan</div>
+      <input class="gb-input" id="gb-name" placeholder="Nama kamu..." maxlength="30">
+      <textarea class="gb-input gb-textarea" id="gb-msg" placeholder="Tulis doa dan pesan indahmu di sini... 🌸" maxlength="200"></textarea>
+      <div class="s-eyebrow" style="text-align:left;margin-bottom:6px">Pilih Ekspresi</div>
+      <div class="gb-emoji-row" id="gb-emojis">
+        <button class="gb-emoji-btn selected" onclick="selectEmoji(this,'🌸')">🌸</button>
+        <button class="gb-emoji-btn" onclick="selectEmoji(this,'💕')">💕</button>
+        <button class="gb-emoji-btn" onclick="selectEmoji(this,'🌹')">🌹</button>
+        <button class="gb-emoji-btn" onclick="selectEmoji(this,'🥰')">🥰</button>
+        <button class="gb-emoji-btn" onclick="selectEmoji(this,'✨')">✨</button>
+        <button class="gb-emoji-btn" onclick="selectEmoji(this,'🎊')">🎊</button>
+        <button class="gb-emoji-btn" onclick="selectEmoji(this,'💍')">💍</button>
+        <button class="gb-emoji-btn" onclick="selectEmoji(this,'🙏')">🙏</button>
+      </div>
+      <button class="gb-submit" onclick="submitMessage()">💌 Kirim Pesan</button>
+    </div>
+
+    <div class="gb-messages" id="gb-messages">
+      <div class="gb-empty" id="gb-empty">Jadilah yang pertama meninggalkan pesan... 🌸</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer-section aos">
+    <div style="font-size:32px;margin-bottom:12px">🌸 💕 🌸</div>
+    <div class="footer-names" id="footer-names">Nova & Ridwan</div>
+    <div class="footer-text">Dibuatkan dengan sepenuh hati 💕<br>Museum Digital Cinta Kita • 2025 — Selamanya</div>
+    <div style="margin-top:30px;font-size:24px;letter-spacing:8px">🌹🌸🌼</div>
+  </footer>
+</div><!-- end page-main -->
+
+<audio id="bg-music" loop>
+  <source src="https://feeldreams.github.io/audio/angelbaby2.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// ============ STATE ============
+let PASSWORD = '0612';
+let pwInput = '';
+let musicPlaying = false;
+let envelopeReady = false;
+let currentSlot = -1;
+let selectedEmoji = '🌸';
+let guestMessages = JSON.parse(localStorage.getItem('gb_msgs') || '[]');
+const petalEmojis = ['🌸','🌺','🌼','🌹','🌷','💮'];
+
+// Config
+let cfg = {
+  name1: 'Nova', name2: 'Ridwan',
+  date: '2025-12-06',
+  quote: 'Kamu adalah rumah yang selalu ingin aku pulang ke sana.',
+  pass: '0612'
+};
+
+// ============ SPARKLE ============
+const sparkC = document.getElementById('sparkle-canvas');
+const sparkX = sparkC.getContext('2d');
+sparkC.width = window.innerWidth; sparkC.height = window.innerHeight;
+
+let sparks = [];
+for (let i=0;i<80;i++) sparks.push(newSpark());
+function newSpark(x,y) {
+  return { x:x||Math.random()*sparkC.width, y:y||Math.random()*sparkC.height,
+    r:Math.random()*2+.5, a:Math.random(), s:Math.random()*.025+.008,
+    c:['#F4C2C2','#FFD6D6','#D4AF6E','#FFFFFF','#F9A8A8'][Math.floor(Math.random()*5)] };
+}
+document.addEventListener('click', e => {
+  for(let i=0;i<10;i++) sparks.push({x:e.clientX+(Math.random()-.5)*60,y:e.clientY+(Math.random()-.5)*60,r:Math.random()*3+1,a:1,s:-.06,c:['#F4C2C2','#FFD6D6','#D4AF6E','#FFFFFF'][Math.floor(Math.random()*4)]});
+});
+function animSparks() {
+  sparkX.clearRect(0,0,sparkC.width,sparkC.height);
+  sparks.forEach((s,i) => {
+    s.a += s.s;
+    if(s.a>1){s.s*=-1;}
+    if(s.a<0){sparks[i]=newSpark();return;}
+    sparkX.save(); sparkX.globalAlpha=s.a*.6; sparkX.fillStyle=s.c; sparkX.shadowBlur=8; sparkX.shadowColor=s.c;
+    sparkX.beginPath();
+    for(let j=0;j<5;j++){const a=(j*4*Math.PI/5)-Math.PI/2;const px=s.x+s.r*2.5*Math.cos(a);const py=s.y+s.r*2.5*Math.sin(a);j===0?sparkX.moveTo(px,py):sparkX.lineTo(px,py);}
+    sparkX.closePath(); sparkX.fill(); sparkX.restore();
+  }); requestAnimationFrame(animSparks);
+}
+animSparks();
+
+// ============ COVER PETALS ============
+const covPet = document.getElementById('cover-petals');
+for(let i=0;i<14;i++){
+  const p=document.createElement('span'); p.className='petal-float';
+  p.textContent=petalEmojis[Math.floor(Math.random()*petalEmojis.length)];
+  p.style.left=Math.random()*100+'%'; p.style.animationDuration=(10+Math.random()*15)+'s';
+  p.style.animationDelay=(Math.random()*10)+'s'; p.style.fontSize=(14+Math.random()*18)+'px';
+  p.style.opacity=(.3+Math.random()*.4).toString(); covPet.appendChild(p);
+}
+
+// ============ PAGE LOGIC ============
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');p.style.display='none';});
+  const pm=document.getElementById('page-main');
+  if(id==='main'){pm.style.display='flex';pm.classList.add('active');}
+  else{pm.style.display='none';pm.classList.remove('active');}
+  // Support both 'envelope' and 'page-envelope' style IDs
+  const pgId = id.startsWith('page-') ? id : 'page-'+id;
+  const pg=document.getElementById(pgId);
+  if(pg){pg.style.display='flex';pg.classList.add('active');}
+}
+
+function zoomGo(fn) {
+  const ov=document.getElementById('zoom-overlay');
+  ov.classList.add('on');
+  setTimeout(()=>{fn();setTimeout(()=>ov.classList.remove('on'),150);},480);
+}
+
+// ============ ENVELOPE ============
+function openEnvelope() {
+  zoomGo(()=>{
+    showPage('page-envelope');
+    setTimeout(()=>{
+      document.getElementById('env-flap').classList.add('open');
+      setTimeout(()=>{document.getElementById('env-letter').classList.add('rise'); setTimeout(()=>{envelopeReady=true;},800);},600);
+    },500);
+  });
+}
+function openLetter() {
+  if(!envelopeReady) return;
+  zoomGo(()=>{showPage('page-loading'); heartLoading();});
+}
+
+// ============ HEART LOADING ============
+function heartLoading() {
+  const c=document.getElementById('heart-canvas');
+  const ctx=c.getContext('2d'); const W=c.width,H=c.height;
+  const total=80; const flowers=[];
+  const hx=t=>16*Math.pow(Math.sin(t),3);
+  const hy=t=>-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
+  for(let i=0;i<total;i++){
+    const t=(i/total)*Math.PI*2;
+    flowers.push({tx:W/2+hx(t)*8,ty:H/2+hy(t)*8+10,cx:W/2,cy:H/2,prog:0,delay:i*30,e:petalEmojis[Math.floor(Math.random()*petalEmojis.length)]});
+  }
+  ctx.font='16px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  let st=null;
+  function draw(ts){
+    if(!st)st=ts; const el=ts-st; ctx.clearRect(0,0,W,H);
+    let done=true;
+    flowers.forEach(f=>{
+      if(el<f.delay){done=false;return;}
+      f.prog=Math.min(1,(el-f.delay)/1200); if(f.prog<1)done=false;
+      ctx.globalAlpha=f.prog; ctx.fillText(f.e,f.cx+(f.tx-f.cx)*easeOut(f.prog),f.cy+(f.ty-f.cy)*easeOut(f.prog));
+    });
+    ctx.globalAlpha=1;
+    if(!done)requestAnimationFrame(draw);
+    else setTimeout(()=>zoomGo(()=>showPage('page-password')),800);
+  }
+  requestAnimationFrame(draw);
+}
+function easeOut(t){return 1-Math.pow(1-t,3);}
+
+// ============ PASSWORD ============
+function pwPress(d){if(pwInput.length>=4)return;pwInput+=d;updateDots();}
+function pwDel(){pwInput=pwInput.slice(0,-1);updateDots();document.getElementById('pw-error').textContent='';}
+function pwEnter(){
+  if(pwInput.length<4){document.getElementById('pw-error').textContent='Masukkan 4 angka dulu, Sayang 🌸';return;}
+  if(pwInput===PASSWORD){
+    document.getElementById('pw-error').textContent='';
+    zoomGo(()=>{showPage('main');startMain();});
+  } else {
+    document.getElementById('pw-error').textContent='Hmm, coba ingat lagi... 🥺';
+    const card=document.querySelector('.pw-card'); card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    pwInput=''; updateDots();
+  }
+}
+function updateDots(){for(let i=0;i<4;i++) document.getElementById('d'+i).classList.toggle('filled',i<pwInput.length);}
+
+// ============ MAIN PAGE ============
+function startMain() {
+  // petals
+  const fc=document.getElementById('falling-container');
+  for(let i=0;i<22;i++){
+    const p=document.createElement('span'); p.className='falling-petal';
+    p.textContent=petalEmojis[Math.floor(Math.random()*petalEmojis.length)];
+    p.style.left=Math.random()*100+'%'; p.style.animationDuration=(8+Math.random()*14)+'s';
+    p.style.animationDelay=(Math.random()*12)+'s'; p.style.fontSize=(14+Math.random()*14)+'px';
+    fc.appendChild(p);
+  }
+  drawLoveHeart();
+  computeCounter();
+  loadGuestbook();
+
+  // music
+  const music=document.getElementById('bg-music'); music.volume=0.35;
+  music.play().then(()=>{musicPlaying=true;document.getElementById('music-btn').textContent='⏸';document.getElementById('music-wave').style.visibility='visible';}).catch(()=>{});
+  document.getElementById('music-bar').classList.add('show');
+
+  // customizer btn
+  document.getElementById('customizer-btn').classList.add('show');
+
+  // toast
+  const t=document.getElementById('toast'); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3200);
+
+  // AOS observer
+  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}}),{threshold:.12});
+  document.querySelectorAll('.aos,.timeline-item').forEach(el=>obs.observe(el));
+
+  // parallax
+  const pm=document.getElementById('page-main');
+  pm.addEventListener('scroll',()=>{
+    const sy=pm.scrollTop;
+    document.querySelectorAll('.hero-circle').forEach((c,i)=>{c.style.transform=`translateY(${sy*(i===0?-.3:.2)}px)`;});
+  });
+}
+
+function drawLoveHeart() {
+  const c=document.getElementById('love-canvas');
+  const ctx=c.getContext('2d'); const W=c.width,H=c.height;
+  const particles=[];
+  for(let i=0;i<120;i++){
+    const t=(i/120)*Math.PI*2;
+    particles.push({tx:W/2+16*Math.pow(Math.sin(t),3)*7,ty:H/2-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))*7+10,x:W/2,y:H/2,prog:0,delay:i*8,color:['#F4C2C2','#E8A0A0','#D4AF6E','#C97A7A','#F9D5D5'][Math.floor(Math.random()*5)],r:4+Math.random()*3});
+  }
+  let st=null;
+  function draw(ts){
+    if(!st)st=ts; const el=ts-st; ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{
+      if(el<p.delay)return; p.prog=Math.min(1,(el-p.delay)/1500);
+      ctx.globalAlpha=p.prog*.85; ctx.beginPath(); ctx.arc(p.x+(p.tx-p.x)*easeOut(p.prog),p.y+(p.ty-p.y)*easeOut(p.prog),p.r,0,Math.PI*2);
+      ctx.fillStyle=p.color; ctx.shadowBlur=8; ctx.shadowColor=p.color; ctx.fill();
+    });
+    ctx.globalAlpha=1;
+    if(particles.some(p=>p.prog<1))requestAnimationFrame(draw);
+    else{
+      let pulse=0;
+      (function pd(){
+        const sc=1+.06*Math.sin(pulse*.05); ctx.clearRect(0,0,W,H);
+        ctx.save(); ctx.translate(W/2,H/2); ctx.scale(sc,sc); ctx.translate(-W/2,-H/2);
+        particles.forEach(p=>{ctx.globalAlpha=.85;ctx.beginPath();ctx.arc(p.tx,p.ty,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.shadowBlur=10;ctx.shadowColor=p.color;ctx.fill();});
+        ctx.restore(); ctx.globalAlpha=1; pulse++; requestAnimationFrame(pd);
+      })();
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+function computeCounter() {
+  const st=new Date(cfg.date); const now=new Date();
+  const td=Math.floor((now-st)/(1e3*60*60*24));
+  const y=Math.floor(td/365),m=Math.floor((td%365)/30),d=td%30;
+  function an(el,v,dur){let s=null;(function f(ts){if(!s)s=ts;const p=Math.min((ts-s)/dur,1);el.textContent=Math.floor(p*v);if(p<1)requestAnimationFrame(f);else el.textContent=v;})(performance.now());}
+  setTimeout(()=>{
+    an(document.getElementById('cnt-y'),y,1500);
+    an(document.getElementById('cnt-m'),m,1500);
+    an(document.getElementById('cnt-d'),d,1500);
+    an(document.getElementById('cnt-total'),td,2000);
+  },800);
+}
+
+// ============ MUSIC ============
+function toggleMusic(){
+  const m=document.getElementById('bg-music'),btn=document.getElementById('music-btn'),w=document.getElementById('music-wave');
+  if(musicPlaying){m.pause();musicPlaying=false;btn.textContent='▶';w.style.visibility='hidden';}
+  else{m.play();musicPlaying=true;btn.textContent='⏸';w.style.visibility='visible';}
+}
+
+// ============ PHOTO UPLOAD ============
+function uploadMainPhoto(input) {
+  if(!input.files||!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const box=document.getElementById('couple-main-photo');
+    let img=box.querySelector('img');
+    if(!img){img=document.createElement('img');box.innerHTML='';box.appendChild(img);}
+    img.src=e.target.result; img.style.borderRadius='inherit';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function openSlot(idx) {
+  currentSlot=idx;
+  document.getElementById('slot-input').click();
+}
+
+function handleSlotUpload(input) {
+  if(!input.files||!input.files[0]||currentSlot<0)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const grid=document.getElementById('photos-grid');
+    const cards=grid.querySelectorAll('.photo-card');
+    const card=cards[currentSlot];
+    if(!card)return;
+    // Remove emoji & label, add img
+    const em=card.querySelector('.p-emoji'),lbl=card.querySelector('.photo-slot-label');
+    if(em)em.style.display='none'; if(lbl)lbl.style.display='none';
+    let img=card.querySelector('img');
+    if(!img){img=document.createElement('img');img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:14px;';card.style.position='relative';card.insertBefore(img,card.firstChild);}
+    img.src=e.target.result;
+    // open lightbox on click now
+    card.onclick=()=>openLightbox(e.target.result);
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function openLightbox(src){const lb=document.getElementById('lightbox');lb.classList.add('open');document.getElementById('lightbox-img').src=src;}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+
+// ============ GUESTBOOK ============
+function selectEmoji(btn,e){
+  selectedEmoji=e;
+  document.querySelectorAll('.gb-emoji-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function submitMessage(){
+  const name=document.getElementById('gb-name').value.trim();
+  const msg=document.getElementById('gb-msg').value.trim();
+  if(!name){showToast('Siapa namamu, Sayang? 🌸');return;}
+  if(!msg){showToast('Tuliskan pesanmu dulu 💌');return;}
+  const entry={name,msg,emoji:selectedEmoji,time:new Date().toLocaleString('id-ID',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})};
+  guestMessages.unshift(entry);
+  try{localStorage.setItem('gb_msgs',JSON.stringify(guestMessages));}catch(e){}
+  document.getElementById('gb-name').value='';
+  document.getElementById('gb-msg').value='';
+  loadGuestbook();
+  showToast('Pesan terkirim! 💌 Makasih ya~');
+}
+
+function loadGuestbook(){
+  const container=document.getElementById('gb-messages');
+  const empty=document.getElementById('gb-empty');
+  if(guestMessages.length===0){if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  // Remove old cards
+  container.querySelectorAll('.gb-msg').forEach(el=>el.remove());
+  guestMessages.forEach((m,i)=>{
+    const div=document.createElement('div'); div.className='gb-msg';
+    const avatarEmojis=['🌸','🌺','🌼','🌹','💕','✨','🥰','💫'];
+    div.innerHTML=`<div class="gb-msg-header"><div class="gb-msg-avatar">${avatarEmojis[i%avatarEmojis.length]}</div><div class="gb-msg-name">${escHtml(m.name)}</div><div class="gb-msg-time">${m.time}</div></div><div class="gb-msg-text">${escHtml(m.msg)}</div><div class="gb-msg-emoji">${m.emoji}</div>`;
+    container.appendChild(div);
+    setTimeout(()=>div.classList.add('visible'),50*i);
+  });
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._to); t._to=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ============ THEME CUSTOMIZER ============
+function toggleCustomizer(){document.getElementById('customizer-panel').classList.toggle('open');}
+
+const themes = {
+  rose: { primary:'#E8A0A0', secondary:'#F4C2C2', accent:'#C97A7A', bg:'#FDF6EC', dark:'#5C3A3A', mid:'#8B5E5E' },
+  sage: { primary:'#81C784', secondary:'#C8E6C9', accent:'#4CAF50', bg:'#F5FFF5', dark:'#2E4A2E', mid:'#4A7A4A' },
+  sky:  { primary:'#74B9E0', secondary:'#B3D9FF', accent:'#2196F3', bg:'#F0F8FF', dark:'#1A3A5C', mid:'#3A6A9C' },
+  lavender: { primary:'#CE93D8', secondary:'#F8E1F4', accent:'#9C27B0', bg:'#FDF5FF', dark:'#4A1A5C', mid:'#7A4A8C' },
+  peach: { primary:'#FFB74D', secondary:'#FFE0B2', accent:'#FF8F00', bg:'#FFFBF0', dark:'#5C3A1A', mid:'#8B6040' },
+  dark: { primary:'#BB86FC', secondary:'#3D3D3D', accent:'#CF6679', bg:'#1E1E1E', dark:'#FFFFFF', mid:'#CCCCCC' }
+};
+
+function applyTheme(name) {
+  const t=themes[name]; if(!t)return;
+  const root=document.documentElement;
+  root.style.setProperty('--rose',t.primary);
+  root.style.setProperty('--blush',t.secondary);
+  root.style.setProperty('--deep-rose',t.accent);
+  root.style.setProperty('--cream',t.bg);
+  root.style.setProperty('--text-dark',t.dark);
+  root.style.setProperty('--text-mid',t.mid);
+  root.style.setProperty('--mauve',t.primary);
+  document.querySelectorAll('.c-theme-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function applyCustomizer(){
+  const n1=document.getElementById('c-name1').value.trim()||'Nova';
+  const n2=document.getElementById('c-name2').value.trim()||'Ridwan';
+  const date=document.getElementById('c-date').value||'2022-02-14';
+  const quote=document.getElementById('c-quote').value.trim()||cfg.quote;
+  const pass=document.getElementById('c-pass').value.trim();
+
+  cfg={name1:n1,name2:n2,date,quote,pass:pass.length===4?pass:PASSWORD};
+  PASSWORD=cfg.pass;
+
+  // Update UI
+  ['cover-n1','hero-n1'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=n1;});
+  ['cover-n2','hero-n2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=n2;});
+  const envNm=document.getElementById('env-names-text');if(envNm)envNm.innerHTML=`${n1} & ${n2}<br>dengan sepenuh hati`;
+  const fn=document.getElementById('footer-names');if(fn)fn.textContent=`${n1} & ${n2}`;
+  const hq=document.getElementById('hero-quote');if(hq)hq.textContent=`"${quote}"`;
+  const qs=document.getElementById('quote-sign');if(qs)qs.textContent=`— Dengan cinta, ${n2} 🌹`;
+
+  // Date
+  const d=new Date(date);
+  const opts={day:'numeric',month:'long',year:'numeric'};
+  const fmtDate=d.toLocaleDateString('id-ID',opts);
+  const hb=document.getElementById('hero-badge');if(hb)hb.textContent=`✨ ${fmtDate} ✨`;
+  const tld=document.getElementById('tl-date-jadian');if(tld)tld.textContent=fmtDate;
+  computeCounter();
+
+  toggleCustomizer();
+  showToast('✨ Perubahan berhasil diterapkan!');
+}
+
+// ============ RESIZE ============
+window.addEventListener('resize',()=>{sparkC.width=window.innerWidth;sparkC.height=window.innerHeight;});
+</script>
+</body>
+</html>
